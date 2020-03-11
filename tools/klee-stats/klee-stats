@@ -21,7 +21,6 @@ import collections
 # Mapping of: (column head, explanation, internal klee name)
 # column head must start with a capital letter
 Legend = [
-    ('Divs', 'number of divisions performed', "Divisions"),
     ('Instrs', 'number of executed instructions', "Instructions"),
     ('Time(s)', 'total wall time (s)', "WallTime"),
     ('TUser(s)', 'total user time', "UserTime"),

@@ -80,16 +80,12 @@
 #include <sstream>
 #include <string>
 #include <sys/mman.h>
-#include <sys/time.h>
 #include <vector>
 
 using namespace llvm;
 using namespace klee;
 
 namespace klee {
-cl::OptionCategory PathGuideCat("Path guidance options",
-                            "These are path guidance !!! options.");
-
 cl::OptionCategory DebugCat("Debugging options",
                             "These are debugging options.");
 
@@ -117,14 +113,6 @@ cl::opt<std::string> MaxTime(
 } // namespace klee
 
 namespace {
-
-/*** Path guidance options ***/
-
-cl::opt<bool> NoForking(
-    "no-forking",
-    cl::init(false),
-    cl::desc("Never fork down paths (default=false)"),
-    cl::cat(PathGuideCat));
 
 /*** Test generation options ***/
 
@@ -421,7 +409,7 @@ cl::opt<bool> DebugCheckForImpliedValues(
 } // namespace
 
 namespace klee {
-  RNG theRNG(std::time(NULL));
+  RNG theRNG;
 }
 
 // XXX hack
@@ -451,7 +439,7 @@ Executor::Executor(LLVMContext &ctx, const InterpreterOptions &opts,
       externalDispatcher(new ExternalDispatcher(ctx)), statsTracker(0),
       pathWriter(0), symPathWriter(0), specialFunctionHandler(0), timers{time::Span(TimerInterval)},
       replayKTest(0), replayPath(0), usingSeeds(0),
-      atMemoryLimit(false), inhibitForking(NoForking), haltExecution(false),
+      atMemoryLimit(false), inhibitForking(false), haltExecution(false),
       ivcEnabled(false), debugLogBuffer(debugBufferString) {
 
 
@@ -833,7 +821,6 @@ void Executor::initializeGlobals(ExecutionState &state) {
 void Executor::branch(ExecutionState &state, 
                       const std::vector< ref<Expr> > &conditions,
                       std::vector<ExecutionState*> &result) {
-                        // klee_message("branching.");
   TimerStatIncrementer timer(stats::forkTime);
   unsigned N = conditions.size();
   assert(N);
@@ -916,8 +903,6 @@ void Executor::branch(ExecutionState &state,
 Executor::StatePair 
 Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
   Solver::Validity res;
-                          // klee_message("forking on condition");
-                          // condition->dump();
   std::map< ExecutionState*, std::vector<SeedInfo> >::iterator it = 
     seedMap.find(&current);
   bool isSeeding = it != seedMap.end();
@@ -1049,7 +1034,6 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
   // hint to just use the single constraint instead of all the binary
   // search ones. If that makes sense.
   if (res==Solver::True) {
-    // klee_message("true");
     if (!isInternal) {
       if (pathWriter) {
         current.pathOS << "1";
@@ -1058,7 +1042,6 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
 
     return StatePair(&current, 0);
   } else if (res==Solver::False) {
-    // klee_message("false");
     if (!isInternal) {
       if (pathWriter) {
         current.pathOS << "0";
@@ -2092,7 +2075,6 @@ void Executor::executeInstruction(ExecutionState &state, KInstruction *ki) {
   }
 
   case Instruction::SDiv: {
-    ++stats::divisions;
     ref<Expr> left = eval(ki, 0, state).value;
     ref<Expr> right = eval(ki, 1, state).value;
     ref<Expr> result = SDivExpr::create(left, right);
@@ -2968,17 +2950,9 @@ void Executor::run(ExecutionState &initialState) {
 
   std::vector<ExecutionState *> newStates(states.begin(), states.end());
   searcher->update(0, newStates, std::vector<ExecutionState *>());
-  // std::string Str;
-  // llvm::raw_string_ostream info(Str);
-  // int stateCount = 0;
+
   while (!states.empty() && !haltExecution) {
     ExecutionState &state = searcher->selectState();
-    // stateCount++;
-    // for(auto it = state.constraints.begin(); it != state.constraints.end(); ++it){
-    //   // (*it)->print(info);
-    //   info << "\n";z
-    // }
-    // info << "--- *** --- " << stateCount << "\n";
     KInstruction *ki = state.pc;
     stepInstruction(state);
 
@@ -2991,7 +2965,6 @@ void Executor::run(ExecutionState &initialState) {
 
     updateStates(&state);
   }
-  // klee_message("%s", info.str().c_str());
 
   delete searcher;
   searcher = 0;

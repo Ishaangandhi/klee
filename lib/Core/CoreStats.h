@@ -15,8 +15,6 @@
 namespace klee {
 namespace stats {
 
-  extern Statistic divisions;
-
   extern Statistic allocations;
   extern Statistic resolveTime;
   extern Statistic instructions;

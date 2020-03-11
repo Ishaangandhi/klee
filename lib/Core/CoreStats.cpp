@@ -11,8 +11,6 @@
 
 using namespace klee;
 
-Statistic stats::divisions("Divisions", "Divs");
-
 Statistic stats::allocations("Allocations", "Alloc");
 Statistic stats::coveredInstructions("CoveredInstructions", "Icov");
 Statistic stats::falseBranches("FalseBranches", "Bf");
