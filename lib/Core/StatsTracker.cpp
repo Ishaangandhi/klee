@@ -455,7 +455,8 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
 	           << "ArrayHashTime INTEGER,"
 #endif
-             << "QueryCexCacheHits INTEGER"
+             << "QueryCexCacheHits INTEGER,"
+             << "Divisions INTEGER"
              << ")";
   char *zErrMsg = nullptr;
   if(sqlite3_exec(statsFile, create.str().c_str(), nullptr, nullptr, &zErrMsg)) {
@@ -491,7 +492,8 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
              << "ArrayHashTime,"
 #endif
-             << "QueryCexCacheHits "
+             << "QueryCexCacheHits ,"
+             << "Divisions "
              << ") VALUES ( "
              << "?, "
              << "?, "
@@ -515,6 +517,7 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
              << "?, "
 #endif
+             << "?, "
              << "? "
              << ")";
 
@@ -548,6 +551,7 @@ void StatsTracker::writeStatsLine() {
   sqlite3_bind_int64(insertStmt, 18, stats::resolveTime);
   sqlite3_bind_int64(insertStmt, 19, stats::queryCexCacheMisses);
   sqlite3_bind_int64(insertStmt, 20, stats::queryCexCacheHits);
+  sqlite3_bind_int64(insertStmt, 21, stats::divisions);
 #ifdef KLEE_ARRAY_DEBUG
   sqlite3_bind_int64(insertStmt, 21, stats::arrayHashTime);
 #endif
@@ -597,6 +601,7 @@ void StatsTracker::writeIStats() {
   StatisticManager &sm = *theStatisticManager;
   unsigned nStats = sm.getNumStatistics();
   llvm::SmallBitVector istatsMask(nStats);
+  istatsMask.set(sm.getStatisticID("Divisions"));
 
   istatsMask.set(sm.getStatisticID("Queries"));
   istatsMask.set(sm.getStatisticID("QueriesValid"));
