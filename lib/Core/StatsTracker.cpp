@@ -492,7 +492,7 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
              << "ArrayHashTime,"
 #endif
-             << "QueryCexCacheHits ,"
+             << "QueryCexCacheHits, "
              << "Divisions "
              << ") VALUES ( "
              << "?, "
@@ -601,7 +601,7 @@ void StatsTracker::writeIStats() {
   StatisticManager &sm = *theStatisticManager;
   unsigned nStats = sm.getNumStatistics();
   llvm::SmallBitVector istatsMask(nStats);
-  istatsMask.set(sm.getStatisticID("Divisions"));
+  // istatsMask.set(sm.getStatisticID("Divisions"));
 
   istatsMask.set(sm.getStatisticID("Queries"));
   istatsMask.set(sm.getStatisticID("QueriesValid"));
