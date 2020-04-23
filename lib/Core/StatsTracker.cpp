@@ -451,9 +451,12 @@ void StatsTracker::writeStatsHeader() {
              << "ForkTime INTEGER,"
              << "ResolveTime INTEGER,"
              << "QueryCexCacheMisses INTEGER,"
+#ifdef KLEE_ARRAY_DEBUG
+	           << "ArrayHashTime INTEGER,"
+#endif
              << "QueryCexCacheHits INTEGER,"
-             << "ArrayHashTime INTEGER"
-         << ')';
+             << "Divisions INTEGER"
+             << ")";
   char *zErrMsg = nullptr;
   if(sqlite3_exec(statsFile, create.str().c_str(), nullptr, nullptr, &zErrMsg)) {
     klee_error("%s", sqlite3ErrToStringAndFree("ERROR creating table: ", zErrMsg).c_str());
@@ -465,47 +468,55 @@ void StatsTracker::writeStatsHeader() {
    * happen, but if it does this statement will fail with SQLITE_CONSTRAINT error. If this happens you should either
    * remove the constraints or consider using `IGNORE` mode.
    */
-  insert << "INSERT OR FAIL INTO stats ("
-             << "Instructions,"
-             << "FullBranches,"
-             << "PartialBranches,"
-             << "NumBranches,"
-             << "UserTime,"
-             << "NumStates,"
-             << "MallocUsage,"
-             << "NumQueries,"
-             << "NumQueryConstructs,"
-             << "WallTime,"
-             << "CoveredInstructions,"
-             << "UncoveredInstructions,"
-             << "QueryTime,"
-             << "SolverTime,"
-             << "CexCacheTime,"
-             << "ForkTime,"
-             << "ResolveTime,"
-             << "QueryCexCacheMisses,"
-             << "QueryCexCacheHits,"
-             << "ArrayHashTime"
-         << ") VALUES ("
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
-             << "?,"
+  insert << "INSERT OR FAIL INTO stats ( "
+             << "Instructions ,"
+             << "FullBranches ,"
+             << "PartialBranches ,"
+             << "NumBranches ,"
+             << "UserTime ,"
+             << "NumStates ,"
+             << "MallocUsage ,"
+             << "NumQueries ,"
+             << "NumQueryConstructs ,"
+             << "NumObjects ,"
+             << "WallTime ,"
+             << "CoveredInstructions ,"
+             << "UncoveredInstructions ,"
+             << "QueryTime ,"
+             << "SolverTime ,"
+             << "CexCacheTime ,"
+             << "ForkTime ,"
+             << "ResolveTime ,"
+             << "QueryCexCacheMisses ,"
+#ifdef KLEE_ARRAY_DEBUG
+             << "ArrayHashTime,"
+#endif
+             << "QueryCexCacheHits, "
+             << "Divisions "
+             << ") VALUES ( "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+#ifdef KLEE_ARRAY_DEBUG
+             << "?, "
+#endif
+             << "?, "
              << "? "
          << ')';
 
@@ -528,16 +539,18 @@ void StatsTracker::writeStatsLine() {
   sqlite3_bind_int64(insertStmt, 7, util::GetTotalMallocUsage() + executor.memory->getUsedDeterministicSize());
   sqlite3_bind_int64(insertStmt, 8, stats::queries);
   sqlite3_bind_int64(insertStmt, 9, stats::queryConstructs);
-  sqlite3_bind_int64(insertStmt, 10, elapsed().toMicroseconds());
-  sqlite3_bind_int64(insertStmt, 11, stats::coveredInstructions);
-  sqlite3_bind_int64(insertStmt, 12, stats::uncoveredInstructions);
-  sqlite3_bind_int64(insertStmt, 13, stats::queryTime);
-  sqlite3_bind_int64(insertStmt, 14, stats::solverTime);
-  sqlite3_bind_int64(insertStmt, 15, stats::cexCacheTime);
-  sqlite3_bind_int64(insertStmt, 16, stats::forkTime);
-  sqlite3_bind_int64(insertStmt, 17, stats::resolveTime);
-  sqlite3_bind_int64(insertStmt, 18, stats::queryCexCacheMisses);
-  sqlite3_bind_int64(insertStmt, 19, stats::queryCexCacheHits);
+  sqlite3_bind_int64(insertStmt, 10, 0);  // was numObjects
+  sqlite3_bind_int64(insertStmt, 11, elapsed().toMicroseconds());
+  sqlite3_bind_int64(insertStmt, 12, stats::coveredInstructions);
+  sqlite3_bind_int64(insertStmt, 13, stats::uncoveredInstructions);
+  sqlite3_bind_int64(insertStmt, 14, stats::queryTime);
+  sqlite3_bind_int64(insertStmt, 15, stats::solverTime);
+  sqlite3_bind_int64(insertStmt, 16, stats::cexCacheTime);
+  sqlite3_bind_int64(insertStmt, 17, stats::forkTime);
+  sqlite3_bind_int64(insertStmt, 18, stats::resolveTime);
+  sqlite3_bind_int64(insertStmt, 19, stats::queryCexCacheMisses);
+  sqlite3_bind_int64(insertStmt, 20, stats::queryCexCacheHits);
+  sqlite3_bind_int64(insertStmt, 21, stats::divisions);
 #ifdef KLEE_ARRAY_DEBUG
   sqlite3_bind_int64(insertStmt, 20, stats::arrayHashTime);
 #else
@@ -589,6 +602,7 @@ void StatsTracker::writeIStats() {
   StatisticManager &sm = *theStatisticManager;
   unsigned nStats = sm.getNumStatistics();
   llvm::SmallBitVector istatsMask(nStats);
+  // istatsMask.set(sm.getStatisticID("Divisions"));
 
   istatsMask.set(sm.getStatisticID("Queries"));
   istatsMask.set(sm.getStatisticID("QueriesValid"));

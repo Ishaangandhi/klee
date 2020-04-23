@@ -302,6 +302,7 @@ bool Z3SolverImpl::internalRunSolver(
   }
 
   ::Z3_lbool satisfiable = Z3_solver_check(builder->ctx, theSolver);
+  // klee_message("called z3. %s", satisfiable ? "sat." : "unsat.");
   runStatusCode = handleSolverResponse(theSolver, satisfiable, objects, values,
                                        hasSolution);
 
