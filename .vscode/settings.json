@@ -73,7 +73,9 @@
         "unordered_set": "cpp",
         "utility": "cpp",
         "vector": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "*.gen": "cpp",
+        "*.inc": "cpp"
     },
     "python.pythonPath": "/Library/Developer/CommandLineTools/usr/bin/python3"
 }

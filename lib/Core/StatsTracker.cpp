@@ -42,6 +42,7 @@
 #include "llvm/Support/Process.h"
 
 #include <fstream>
+#include <iostream>
 #include <unistd.h>
 
 using namespace klee;
@@ -456,7 +457,69 @@ void StatsTracker::writeStatsHeader() {
 	           << "ArrayHashTime INTEGER,"
 #endif
              << "QueryCexCacheHits INTEGER,"
-             << "Divisions INTEGER"
+             << "Breaks INTEGER,"
+             << "Returns INTEGER,"
+             << "Switchs INTEGER,"
+             << "IndirectBrs INTEGER,"
+             << "Invokes INTEGER,"
+             << "Resumes INTEGER,"
+             << "Unreachables INTEGER,"
+             << "CleanupRets INTEGER,"
+             << "CatchRets INTEGER,"
+             << "CatchPads INTEGER,"
+             << "CatchSwitchs INTEGER,"
+             << "FNegs INTEGER,"
+             << "Adds INTEGER,"
+             << "FAdds INTEGER,"
+             << "Subs INTEGER,"
+             << "FSubs INTEGER,"
+             << "Muls INTEGER,"
+             << "FMuls INTEGER,"
+             << "UDivs INTEGER,"
+             << "SDivs INTEGER,"
+             << "FDivs INTEGER,"
+             << "URems INTEGER,"
+             << "SRems INTEGER,"
+             << "FRems INTEGER,"
+             << "Ands INTEGER,"
+             << "Ors INTEGER,"
+             << "Xors INTEGER,"
+             << "Allocas INTEGER,"
+             << "Loads INTEGER,"
+             << "Stores INTEGER,"
+             << "AtomicCmpXchgs INTEGER,"
+             << "AtomicRMWs INTEGER,"
+             << "Fences INTEGER,"
+             << "GetElementPtrs INTEGER,"
+             << "Truncs INTEGER,"
+             << "ZExts INTEGER,"
+             << "SExts INTEGER,"
+             << "FPTruncs INTEGER,"
+             << "FPExts INTEGER,"
+             << "FPToUIs INTEGER,"
+             << "FPToSIs INTEGER,"
+             << "UIToFPs INTEGER,"
+             << "SIToFPs INTEGER,"
+             << "IntToPtrs INTEGER,"
+             << "PtrToInts INTEGER,"
+             << "BitCasts INTEGER,"
+             << "AddrSpaceCasts INTEGER,"
+             << "ICmps INTEGER,"
+             << "FCmps INTEGER,"
+             << "PHIs INTEGER,"
+             << "Selects INTEGER,"
+             << "Calls INTEGER,"
+             << "Shls INTEGER,"
+             << "LShrs INTEGER,"
+             << "AShrs INTEGER,"
+             << "VAArgs INTEGER,"
+             << "ExtractElements INTEGER,"
+             << "InsertElements INTEGER,"
+             << "ShuffleVectors INTEGER,"
+             << "ExtractValues INTEGER,"
+             << "InsertValues INTEGER,"
+             << "LandingPads INTEGER,"
+             << "CleanupPads INTEGER "
              << ")";
   char *zErrMsg = nullptr;
   if(sqlite3_exec(statsFile, create.str().c_str(), nullptr, nullptr, &zErrMsg)) {
@@ -493,8 +556,130 @@ void StatsTracker::writeStatsHeader() {
              << "ArrayHashTime,"
 #endif
              << "QueryCexCacheHits, "
-             << "Divisions "
+             << "Returns, "
+             << "Breaks, "
+             << "Switchs, "
+             << "IndirectBrs, "
+             << "Invokes, "
+             << "Resumes, "
+             << "Unreachables, "
+             << "CleanupRets, "
+             << "CatchRets, "
+             << "CatchPads, "
+             << "CatchSwitchs, "
+             << "FNegs, "
+             << "Adds, "
+             << "FAdds, "
+             << "Subs, "
+             << "FSubs, "
+             << "Muls, "
+             << "FMuls, "
+             << "UDivs, "
+             << "SDivs, "
+             << "FDivs, "
+             << "URems, "
+             << "SRems, "
+             << "FRems, "
+             << "Ands, "
+             << "Ors, "
+             << "Xors, "
+             << "Allocas, "
+             << "Loads, "
+             << "Stores, "
+             << "AtomicCmpXchgs, "
+             << "AtomicRMWs, "
+             << "Fences, "
+             << "GetElementPtrs, "
+             << "Truncs, "
+             << "ZExts, "
+             << "SExts, "
+             << "FPTruncs, "
+             << "FPExts, "
+             << "FPToUIs, "
+             << "FPToSIs, "
+             << "UIToFPs, "
+             << "SIToFPs, "
+             << "IntToPtrs, "
+             << "PtrToInts, "
+             << "BitCasts, "
+             << "AddrSpaceCasts, "
+             << "ICmps, "
+             << "FCmps, "
+             << "PHIs, "
+             << "Selects, "
+             << "Calls, "
+             << "Shls, "
+             << "LShrs, "
+             << "AShrs, "
+             << "VAArgs, "
+             << "ExtractElements, "
+             << "InsertElements, "
+             << "ShuffleVectors, "
+             << "ExtractValues, "
+             << "InsertValues, "
+             << "LandingPads, "
+             << "CleanupPads "
              << ") VALUES ( "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
              << "?, "
              << "?, "
              << "?, "
@@ -518,6 +703,8 @@ void StatsTracker::writeStatsHeader() {
              << "?, "
 #endif
              << "?, "
+             << "?, "
+             << "?, "
              << "? "
          << ')';
 
@@ -540,7 +727,7 @@ void StatsTracker::writeStatsLine() {
   sqlite3_bind_int64(insertStmt, 7, util::GetTotalMallocUsage() + executor.memory->getUsedDeterministicSize());
   sqlite3_bind_int64(insertStmt, 8, stats::queries);
   sqlite3_bind_int64(insertStmt, 9, stats::queryConstructs);
-  sqlite3_bind_int64(insertStmt, 10, 42);  // was numObjects
+  sqlite3_bind_int64(insertStmt, 10, 0);  // was numObjects
   sqlite3_bind_int64(insertStmt, 11, elapsed().toMicroseconds());
   sqlite3_bind_int64(insertStmt, 12, stats::coveredInstructions);
   sqlite3_bind_int64(insertStmt, 13, stats::uncoveredInstructions);
@@ -551,7 +738,71 @@ void StatsTracker::writeStatsLine() {
   sqlite3_bind_int64(insertStmt, 18, stats::resolveTime);
   sqlite3_bind_int64(insertStmt, 19, stats::queryCexCacheMisses);
   sqlite3_bind_int64(insertStmt, 20, stats::queryCexCacheHits);
-  sqlite3_bind_int64(insertStmt, 21, stats::divisions);
+  sqlite3_bind_int64(insertStmt, 21, stats::numRet);
+  sqlite3_bind_int64(insertStmt, 22, stats::numBr);
+  sqlite3_bind_int64(insertStmt, 23, stats::numSwitch);
+  sqlite3_bind_int64(insertStmt, 24, stats::numIndirectBr);
+  sqlite3_bind_int64(insertStmt, 25, stats::numInvoke);
+  sqlite3_bind_int64(insertStmt, 26, stats::numResume);
+  sqlite3_bind_int64(insertStmt, 27, stats::numUnreachable);
+  sqlite3_bind_int64(insertStmt, 28, stats::numCleanupRet);
+  sqlite3_bind_int64(insertStmt, 29, stats::numCatchRet);
+  sqlite3_bind_int64(insertStmt, 30, stats::numCatchPad);
+  sqlite3_bind_int64(insertStmt, 31, stats::numCatchSwitch);
+  sqlite3_bind_int64(insertStmt, 32, stats::numFNeg);
+  sqlite3_bind_int64(insertStmt, 33, stats::numAdd);
+  sqlite3_bind_int64(insertStmt, 34, stats::numFAdd);
+  sqlite3_bind_int64(insertStmt, 35, stats::numSub);
+  sqlite3_bind_int64(insertStmt, 36, stats::numFSub);
+  sqlite3_bind_int64(insertStmt, 37, stats::numMul);
+  sqlite3_bind_int64(insertStmt, 38, stats::numFMul);
+  sqlite3_bind_int64(insertStmt, 39, stats::numUDiv);
+  sqlite3_bind_int64(insertStmt, 40, stats::numSDiv);
+  sqlite3_bind_int64(insertStmt, 41, stats::numFDiv);
+  sqlite3_bind_int64(insertStmt, 42, stats::numURem);
+  sqlite3_bind_int64(insertStmt, 43, stats::numSRem);
+  sqlite3_bind_int64(insertStmt, 44, stats::numFRem);
+  sqlite3_bind_int64(insertStmt, 45, stats::numAnd);
+  sqlite3_bind_int64(insertStmt, 46, stats::numOr);
+  sqlite3_bind_int64(insertStmt, 47, stats::numXor);
+  sqlite3_bind_int64(insertStmt, 48, stats::numAlloca);
+  sqlite3_bind_int64(insertStmt, 49, stats::numLoad);
+  sqlite3_bind_int64(insertStmt, 50, stats::numStore);
+  sqlite3_bind_int64(insertStmt, 51, stats::numAtomicCmpXchg);
+  sqlite3_bind_int64(insertStmt, 52, stats::numAtomicRMW);
+  sqlite3_bind_int64(insertStmt, 53, stats::numFence);
+  sqlite3_bind_int64(insertStmt, 54, stats::numGetElementPtr);
+  sqlite3_bind_int64(insertStmt, 55, stats::numTrunc);
+  sqlite3_bind_int64(insertStmt, 56, stats::numZExt);
+  sqlite3_bind_int64(insertStmt, 57, stats::numSExt);
+  sqlite3_bind_int64(insertStmt, 58, stats::numFPTrunc);
+  sqlite3_bind_int64(insertStmt, 59, stats::numFPExt);
+  sqlite3_bind_int64(insertStmt, 60, stats::numFPToUI);
+  sqlite3_bind_int64(insertStmt, 61, stats::numFPToSI);
+  sqlite3_bind_int64(insertStmt, 62, stats::numUIToFP);
+  sqlite3_bind_int64(insertStmt, 63, stats::numSIToFP);
+  sqlite3_bind_int64(insertStmt, 64, stats::numIntToPtr);
+  sqlite3_bind_int64(insertStmt, 65, stats::numPtrToInt);
+  sqlite3_bind_int64(insertStmt, 66, stats::numBitCast);
+  sqlite3_bind_int64(insertStmt, 67, stats::numAddrSpaceCast);
+  sqlite3_bind_int64(insertStmt, 68, stats::numICmp);
+  sqlite3_bind_int64(insertStmt, 69, stats::numFCmp);
+  sqlite3_bind_int64(insertStmt, 70, stats::numPHI);
+  sqlite3_bind_int64(insertStmt, 71, stats::numSelect);
+  sqlite3_bind_int64(insertStmt, 72, stats::numCall);
+  sqlite3_bind_int64(insertStmt, 73, stats::numShl);
+  sqlite3_bind_int64(insertStmt, 74, stats::numLShr);
+  sqlite3_bind_int64(insertStmt, 75, stats::numAShr);
+  sqlite3_bind_int64(insertStmt, 76, stats::numVAArg);
+  sqlite3_bind_int64(insertStmt, 77, stats::numExtractElement);
+  sqlite3_bind_int64(insertStmt, 78, stats::numInsertElement);
+  sqlite3_bind_int64(insertStmt, 79, stats::numShuffleVector);
+  sqlite3_bind_int64(insertStmt, 80, stats::numExtractValue);
+  sqlite3_bind_int64(insertStmt, 81, stats::numInsertValue);
+  sqlite3_bind_int64(insertStmt, 82, stats::numLandingPad);
+  sqlite3_bind_int64(insertStmt, 83, stats::numCleanupPad);
+
+
 #ifdef KLEE_ARRAY_DEBUG
   sqlite3_bind_int64(insertStmt, 20, stats::arrayHashTime);
 #else
@@ -603,7 +854,72 @@ void StatsTracker::writeIStats() {
   StatisticManager &sm = *theStatisticManager;
   unsigned nStats = sm.getNumStatistics();
   llvm::SmallBitVector istatsMask(nStats);
-  // istatsMask.set(sm.getStatisticID("Divisions"));
+
+  istatsMask.set(sm.getStatisticID("Returns"));
+  istatsMask.set(sm.getStatisticID("Breaks"));
+  istatsMask.set(sm.getStatisticID("Switchs"));
+  istatsMask.set(sm.getStatisticID("IndirectBrs"));
+  istatsMask.set(sm.getStatisticID("Invokes"));
+  istatsMask.set(sm.getStatisticID("Resumes"));
+  istatsMask.set(sm.getStatisticID("Unreachables"));
+  istatsMask.set(sm.getStatisticID("CleanupRets"));
+  istatsMask.set(sm.getStatisticID("CatchRets"));
+  istatsMask.set(sm.getStatisticID("CatchPads"));
+  istatsMask.set(sm.getStatisticID("CatchSwitchs"));
+  istatsMask.set(sm.getStatisticID("FNegs"));
+  istatsMask.set(sm.getStatisticID("Adds"));
+  istatsMask.set(sm.getStatisticID("FAdds"));
+  istatsMask.set(sm.getStatisticID("Subs"));
+  istatsMask.set(sm.getStatisticID("FSubs"));
+  istatsMask.set(sm.getStatisticID("Muls"));
+  istatsMask.set(sm.getStatisticID("FMuls"));
+  istatsMask.set(sm.getStatisticID("UDivs"));
+  istatsMask.set(sm.getStatisticID("SDivs"));
+  istatsMask.set(sm.getStatisticID("FDivs"));
+  istatsMask.set(sm.getStatisticID("URems"));
+  std::cerr<<"here4:" << sm.getStatisticID("URems")<<std::endl;
+
+  istatsMask.set(sm.getStatisticID("SRems"));
+  istatsMask.set(sm.getStatisticID("FRems"));
+  istatsMask.set(sm.getStatisticID("Ands"));
+  istatsMask.set(sm.getStatisticID("Ors"));
+  istatsMask.set(sm.getStatisticID("Xors"));
+  istatsMask.set(sm.getStatisticID("Allocas"));
+  istatsMask.set(sm.getStatisticID("Loads"));
+  istatsMask.set(sm.getStatisticID("Stores"));
+  istatsMask.set(sm.getStatisticID("AtomicCmpXchgs"));
+  istatsMask.set(sm.getStatisticID("AtomicRMWs"));
+  istatsMask.set(sm.getStatisticID("Fences"));
+  istatsMask.set(sm.getStatisticID("GetElementPtrs"));
+  istatsMask.set(sm.getStatisticID("Truncs"));
+  istatsMask.set(sm.getStatisticID("ZExts"));
+  istatsMask.set(sm.getStatisticID("SExts"));
+  istatsMask.set(sm.getStatisticID("FPTruncs"));
+  istatsMask.set(sm.getStatisticID("FPExts"));
+  istatsMask.set(sm.getStatisticID("FPToUIs"));
+  istatsMask.set(sm.getStatisticID("FPToSIs"));
+  istatsMask.set(sm.getStatisticID("UIToFPs"));
+  istatsMask.set(sm.getStatisticID("SIToFPs"));
+  istatsMask.set(sm.getStatisticID("IntToPtrs"));
+  istatsMask.set(sm.getStatisticID("PtrToInts"));
+  istatsMask.set(sm.getStatisticID("BitCasts"));
+  istatsMask.set(sm.getStatisticID("AddrSpaceCasts"));
+  istatsMask.set(sm.getStatisticID("ICmps"));
+  istatsMask.set(sm.getStatisticID("FCmps"));
+  istatsMask.set(sm.getStatisticID("PHIs"));
+  istatsMask.set(sm.getStatisticID("Selects"));
+  istatsMask.set(sm.getStatisticID("Calls"));
+  istatsMask.set(sm.getStatisticID("Shls"));
+  istatsMask.set(sm.getStatisticID("LShrs"));
+  istatsMask.set(sm.getStatisticID("AShrs"));
+  istatsMask.set(sm.getStatisticID("VAArgs"));
+  istatsMask.set(sm.getStatisticID("ExtractElements"));
+  istatsMask.set(sm.getStatisticID("InsertElements"));
+  istatsMask.set(sm.getStatisticID("ShuffleVectors"));
+  istatsMask.set(sm.getStatisticID("ExtractValues"));
+  istatsMask.set(sm.getStatisticID("InsertValues"));
+  istatsMask.set(sm.getStatisticID("LandingPads"));
+  istatsMask.set(sm.getStatisticID("CleanupPads"));
 
   istatsMask.set(sm.getStatisticID("Queries"));
   istatsMask.set(sm.getStatisticID("QueriesValid"));

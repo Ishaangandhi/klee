@@ -1637,8 +1637,93 @@ Function* Executor::getTargetFunction(Value *calledVal, ExecutionState &state) {
   }
 }
 
+void registerInstruction(unsigned OpCode) {
+  switch (OpCode) {
+   // Terminators
+   case Instruction::Ret:           ++stats::numRet; break;
+   case Instruction::Br:            ++stats::numBr; break;
+   case Instruction::Switch:        ++stats::numSwitch; break;
+   case Instruction::IndirectBr:    ++stats::numIndirectBr; break;
+   case Instruction::Invoke:        ++stats::numInvoke; break;
+   case Instruction::Resume:        ++stats::numResume; break;
+   case Instruction::Unreachable:   ++stats::numUnreachable; break;
+   case Instruction::CleanupRet:    ++stats::numCleanupRet; break;
+   case Instruction::CatchRet:      ++stats::numCatchRet; break;
+   case Instruction::CatchPad:      ++stats::numCatchPad; break;
+   case Instruction::CatchSwitch:   ++stats::numCatchSwitch; break;
+ 
+   // Standard unary operators...
+   case Instruction::FNeg:          ++stats::numFNeg; break;
+
+   // Standard binary operators...
+   case Instruction::Add:           ++stats::numAdd; break;
+   case Instruction::FAdd:          ++stats::numFAdd; break;
+   case Instruction::Sub:           ++stats::numSub; break;
+   case Instruction::FSub:          ++stats::numFSub; break;
+   case Instruction::Mul:           ++stats::numMul; break;
+   case Instruction::FMul:          ++stats::numFMul; break;
+   case Instruction::UDiv:          ++stats::numUDiv; break;
+   case Instruction::SDiv:          ++stats::numSDiv; break;
+   case Instruction::FDiv:          ++stats::numFDiv; break;
+   case Instruction::URem:          ++stats::numURem; break;
+   case Instruction::SRem:          ++stats::numSRem; break;
+   case Instruction::FRem:          ++stats::numFRem; break;
+ 
+   // Logical operators...
+   case Instruction::And:           ++stats::numAnd; break;
+   case Instruction::Or :           ++stats::numOr; break;
+   case Instruction::Xor:           ++stats::numXor; break;
+ 
+   // Memory instructions...
+   case Instruction::Alloca:        ++stats::numAlloca; break;
+   case Instruction::Load:          ++stats::numLoad; break;
+   case Instruction::Store:         ++stats::numStore; break;
+   case Instruction::AtomicCmpXchg: ++stats::numAtomicCmpXchg; break;
+   case Instruction::AtomicRMW:     ++stats::numAtomicRMW; break;
+   case Instruction::Fence:         ++stats::numFence; break;
+   case Instruction::GetElementPtr: ++stats::numGetElementPtr; break;
+ 
+   // Convert instructions...
+   case Instruction::Trunc:         ++stats::numTrunc; break;
+   case Instruction::ZExt:          ++stats::numZExt; break;
+   case Instruction::SExt:          ++stats::numSExt; break;
+   case Instruction::FPTrunc:       ++stats::numFPTrunc; break;
+   case Instruction::FPExt:         ++stats::numFPExt; break;
+   case Instruction::FPToUI:        ++stats::numFPToUI; break;
+   case Instruction::FPToSI:        ++stats::numFPToSI; break;
+   case Instruction::UIToFP:        ++stats::numUIToFP; break;
+   case Instruction::SIToFP:        ++stats::numSIToFP; break;
+   case Instruction::IntToPtr:      ++stats::numIntToPtr; break;
+   case Instruction::PtrToInt:      ++stats::numPtrToInt; break;
+   case Instruction::BitCast:       ++stats::numBitCast; break;
+   case Instruction::AddrSpaceCast: ++stats::numAddrSpaceCast; break;
+ 
+   // Other instructions...
+   case Instruction::ICmp:            ++stats::numICmp; break;
+   case Instruction::FCmp:            ++stats::numFCmp; break;
+   case Instruction::PHI:             ++stats::numPHI; break;
+   case Instruction::Select:          ++stats::numSelect; break;
+   case Instruction::Call:            ++stats::numCall; break;
+   case Instruction::Shl:             ++stats::numShl; break;
+   case Instruction::LShr:            ++stats::numLShr; break;
+   case Instruction::AShr:            ++stats::numAShr; break;
+   case Instruction::VAArg:           ++stats::numVAArg; break;
+   case Instruction::ExtractElement:  ++stats::numExtractElement; break;
+   case Instruction::InsertElement:   ++stats::numInsertElement; break;
+   case Instruction::ShuffleVector:   ++stats::numShuffleVector; break;
+   case Instruction::ExtractValue:    ++stats::numExtractValue; break;
+   case Instruction::InsertValue:     ++stats::numInsertValue; break;
+   case Instruction::LandingPad:      ++stats::numLandingPad; break;
+   case Instruction::CleanupPad:      ++stats::numCleanupPad; break;
+ 
+  //  default: return "<Invalid operator> ";
+   }
+
+}
+
 void Executor::executeInstruction(ExecutionState &state, KInstruction *ki) {
   Instruction *i = ki->inst;
+  registerInstruction(i->getOpcode());
   switch (i->getOpcode()) {
     // Control flow
   case Instruction::Ret: {
@@ -2092,7 +2177,6 @@ void Executor::executeInstruction(ExecutionState &state, KInstruction *ki) {
   }
 
   case Instruction::SDiv: {
-    ++stats::divisions;
     ref<Expr> left = eval(ki, 0, state).value;
     ref<Expr> right = eval(ki, 1, state).value;
     ref<Expr> result = SDivExpr::create(left, right);
