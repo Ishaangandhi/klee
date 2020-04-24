@@ -442,6 +442,7 @@ void StatsTracker::writeStatsHeader() {
              << "MallocUsage INTEGER,"
              << "NumQueries INTEGER,"
              << "NumQueryConstructs INTEGER,"
+             << "NumObjects INTEGER,"
              << "WallTime REAL,"
              << "CoveredInstructions INTEGER,"
              << "UncoveredInstructions INTEGER,"
@@ -539,7 +540,7 @@ void StatsTracker::writeStatsLine() {
   sqlite3_bind_int64(insertStmt, 7, util::GetTotalMallocUsage() + executor.memory->getUsedDeterministicSize());
   sqlite3_bind_int64(insertStmt, 8, stats::queries);
   sqlite3_bind_int64(insertStmt, 9, stats::queryConstructs);
-  sqlite3_bind_int64(insertStmt, 10, 0);  // was numObjects
+  sqlite3_bind_int64(insertStmt, 10, 42);  // was numObjects
   sqlite3_bind_int64(insertStmt, 11, elapsed().toMicroseconds());
   sqlite3_bind_int64(insertStmt, 12, stats::coveredInstructions);
   sqlite3_bind_int64(insertStmt, 13, stats::uncoveredInstructions);
@@ -612,6 +613,7 @@ void StatsTracker::writeIStats() {
   istatsMask.set(sm.getStatisticID("Instructions"));
   istatsMask.set(sm.getStatisticID("InstructionTimes"));
   istatsMask.set(sm.getStatisticID("InstructionRealTimes"));
+  // istatsMask.set(sm.getStatisticID("WallTime"));
   istatsMask.set(sm.getStatisticID("Forks"));
   istatsMask.set(sm.getStatisticID("CoveredInstructions"));
   istatsMask.set(sm.getStatisticID("UncoveredInstructions"));
